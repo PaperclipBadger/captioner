@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "captioner"
+version = "0.1.0"
+description = "Collect captions for images for fine-tuning stable diffusion models."
+authors = ["Blaine Rogers <blaine.w.rogers@gmail.com>"]
+license = "MIT"
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+Flask = "^3.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

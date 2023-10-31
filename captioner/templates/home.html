@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>captioner</title>
+		<style>body { max-width: 600px; margin: auto }</style>
+	</head>
+	<body>
+		<!-- maybe if you ask Blaine nicely you can see the source code -->
+		<h1>captioner</h1>
+
+        <p>I need captions for these images to fine-tune a stable diffusion model.</p>
+		<p>Send this site to two of your friends! 🔺</p>
+
+		{% if next_image %}
+      	<p><a href="{{ url_for('caption', image_id=next_image.image_id)}}">Start captioning!</a></p>
+		{% endif %}
+
+		<p><a href="{{ url_for('download') }}">Download the captions</a></p>
+
+	</body>
+</html>
