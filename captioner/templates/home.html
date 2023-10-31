@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>captioner</title>
-		<style>body { max-width: 600px; margin: auto }</style>
+		<style>body { max-width: 600px; margin: auto } td { width: 5em }</style>
 	</head>
 	<body>
 		<!-- maybe if you ask Blaine nicely you can see the source code -->
@@ -18,5 +18,16 @@
 
 		<p><a href="{{ url_for('download') }}">Download the captions</a></p>
 
+		<h2>Stats</h2>
+		<table>
+			<tr>
+				<td>Images</td>
+				<td>{{ image_count }}</td>
+			</tr>
+			<tr>
+				<td>Captions</td>
+				<td>{{ caption_count }}</td>
+			</tr>
+		</table>
 	</body>
 </html>

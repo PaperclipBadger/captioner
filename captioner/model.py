@@ -16,6 +16,22 @@ class Image:
 class Database:
     db: sqlite3.Connection
 
+    def count_images(self) -> int:
+        with self.db:
+            cursor = self.db.execute(
+                "SELECT COUNT(image.imageid) FROM image"
+            )
+            row = cursor.fetchone()
+        return row[0]
+
+    def count_captions(self) -> int:
+        with self.db:
+            cursor = self.db.execute(
+                "SELECT COUNT(caption.captionid) FROM caption"
+            )
+            row = cursor.fetchone()
+        return row[0]
+
     def get_image(self, image_id: int) -> Image:
         with self.db:
             cursor = self.db.execute(

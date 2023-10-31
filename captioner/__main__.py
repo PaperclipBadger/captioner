@@ -41,6 +41,8 @@ def home():
 
     return flask.render_template(
         "home.html",
+        image_count=database.count_images(),
+        caption_count=database.count_captions(),
         next_image=next_image,
     )
     
