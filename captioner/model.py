@@ -1,3 +1,4 @@
+from typing import List
 import dataclasses
 import functools
 
@@ -8,7 +9,7 @@ import sqlite3
 class Image:
     image_id: int
     name: str
-    captions: list[str]
+    captions: List[str]
 
 
 @dataclasses.dataclass
@@ -56,7 +57,7 @@ class Database:
                 captions=self.get_captions(row['imageid']),
             )
     
-    def get_all_images(self) -> list[Image]:
+    def get_all_images(self) -> List[Image]:
         # warning! this is the whole database!
         with self.db:
             cursor = self.db.execute("SELECT * FROM image")
@@ -72,7 +73,7 @@ class Database:
         ]
 
     
-    def get_captions(self, image_id: int) -> list[str]:
+    def get_captions(self, image_id: int) -> List[str]:
         with self.db:
             cursor = self.db.execute(
                 "SELECT * FROM caption WHERE captionimage = ?",
