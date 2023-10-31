@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>captioner</title>
-		<style>body { max-width: 40em; margin: auto; font-size: 150% }</style>
+		<style>body, input[type=text], input[type=submit] { max-width: 40em; margin: auto; font-size: 150% }</style>
 	</head>
 	<body>
 		<!-- maybe if you ask Blaine nicely you can see the source code -->
@@ -13,7 +13,7 @@
 
         <p>Caption this image:</p>
 
-        <img style="height: 300px" src="{{ url_for('static', filename='images/' + image.name) }}" alt="image" />
+        <img style="max-height: 40em; max-width: 40em" src="{{ url_for('static', filename='images/' + image.name) }}" alt="image" />
 
         {% if image.captions %}
         <p>Existing captions:</p>
