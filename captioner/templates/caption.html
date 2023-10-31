@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>captioner</title>
-		<style>body { max-width: 600px; margin: auto }</style>
+		<style>body { max-width: 40em; margin: auto; font-size: 150% }</style>
 	</head>
 	<body>
 		<!-- maybe if you ask Blaine nicely you can see the source code -->
@@ -15,10 +15,8 @@
 
         <img style="height: 300px" src="{{ url_for('static', filename='images/' + image.name) }}" alt="image" />
 
-        <p>Give one noun phrase describing the subject or style of the image. Don't think too hard about it.</p>
-
         {% if image.captions %}
-        <p>Try to avoid mentioning anything that's in an existing caption:</p>
+        <p>Existing captions:</p>
         <ul>
             {% for caption in image.captions %}
             <li>{{ caption }}</li>
