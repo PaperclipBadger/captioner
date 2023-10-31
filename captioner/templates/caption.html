@@ -15,17 +15,15 @@
 
         <img style="max-height: 40em; max-width: 40em" src="{{ url_for('static', filename='images/' + image.name) }}" alt="image" />
 
+        <p>Give a short noun phrase describing the subject or style of the image. Don't think too hard about it.</p>
         {% if image.captions %}
-        <p>Existing captions:</p>
+        <p>Try to avoid anything mentioned in the existing captions:</p>
         <ul>
             {% for caption in image.captions %}
             <li>{{ caption }}</li>
             {% endfor %}
         </ul>
         {% endif %}
-		{% if next_image %}
-        <a href="{{ url_for('caption', image_id=next_image.image_id)}}">Start cpationing!</a>
-		{% endif %}
 
         <form action="/api/caption" method="POST">
             <input type="hidden" id="image_id" name="image_id" value="{{ image.image_id }}" />
