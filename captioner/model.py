@@ -49,7 +49,7 @@ class Database:
                 captions=self.get_captions(image_id),
             )
         
-    def get_least_image(self) -> Image:
+    def get_least_images(self) -> List[Image]:
         with self.db:
             cursor = self.db.execute(
                 """
@@ -58,20 +58,19 @@ class Database:
                 LEFT JOIN caption ON image.imageid = caption.captionimage 
                 GROUP BY image.imageid
                 ORDER BY COUNT(caption.captionid) ASC 
-                LIMIT 1
+                LIMIT 10
                 """
             )
-            row = cursor.fetchone()
-        
+            rows = cursor.fetchall()
 
-        if row is None:
-            raise LookupError("no images!")
-        else:
-            return Image(
+        return [
+            Image(
                 image_id=row['imageid'],
                 name=row['imagename'],
                 captions=self.get_captions(row['imageid']),
             )
+            for row in rows
+        ]
     
     def get_all_images(self) -> List[Image]:
         # warning! this is the whole database!

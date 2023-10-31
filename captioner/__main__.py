@@ -1,5 +1,8 @@
+from typing import Optional
+
 import csv
 import io
+import itertools
 import sqlite3
 
 import flask
@@ -31,19 +34,27 @@ def close_db(exception=None):
         db.close()
 
 
+request_count = iter(itertools.count())
+
+def get_next_image(database) -> Optional[model.Image]:
+    global request_count
+
+    next_images = database.get_least_images()
+    i = next(request_count)
+    return (
+        next_images[i % len(next_images)]
+        if next_images else None
+    )
+
+
 @app.route("/")
 def home():
     database = model.Database(get_db())
-    try:
-        next_image = database.get_least_image()
-    except LookupError:
-        next_image = None
-
     return flask.render_template(
         "home.html",
         image_count=database.count_images(),
         caption_count=database.count_captions(),
-        next_image=next_image,
+        next_image=get_next_image(database),
     )
     
 @app.route("/<int:image_id>")
@@ -80,7 +91,8 @@ def api_add_caption():
     image_id = int(flask.request.form["image_id"])
     caption_text = flask.request.form["caption_text"]
     database.add_caption(image_id, caption_text)
-    next_image = database.get_least_image()
+
+    next_image = get_next_image(database),
     return flask.redirect(f"/{next_image.image_id}")
 
 
