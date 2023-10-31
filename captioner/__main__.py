@@ -92,7 +92,7 @@ def api_add_caption():
     caption_text = flask.request.form["caption_text"]
     database.add_caption(image_id, caption_text)
 
-    next_image = get_next_image(database),
+    next_image = get_next_image(database)
     return flask.redirect(f"/{next_image.image_id}")
 
 
