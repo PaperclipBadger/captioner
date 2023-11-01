@@ -25,6 +25,9 @@
         </ul>
         {% endif %}
 
+        {% if error %}
+        <p><span style="color: red">Error: {{ error }}</span></p>
+        {% endif %}
         <form action="/api/caption" method="POST">
             <input type="hidden" id="image_id" name="image_id" value="{{ image.image_id }}" />
             <input type="text" id="caption_text" name="caption_text" autofocus/>

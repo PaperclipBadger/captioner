@@ -65,6 +65,7 @@ def caption(image_id: int):
     return flask.render_template(
         "caption.html",
         image=image,
+        error=flask.request.args.get("error", None),
     )
 
 @app.route("/download")
@@ -88,13 +89,16 @@ def download():
 
 @app.route("/api/caption", methods=["POST"])
 def api_add_caption():
-    database = model.Database(get_db())
     image_id = int(flask.request.form["image_id"])
-    caption_text = flask.request.form["caption_text"]
-    database.add_caption(image_id, caption_text)
+    caption_text = flask.request.form["caption_text"].strip()
 
-    next_image = get_next_image(database)
-    return flask.redirect(f"/{next_image.image_id}")
+    if not caption_text:
+        return flask.redirect(flask.url_for("caption", image_id=image_id, error="No caption text provided"))
+    else:
+        database = model.Database(get_db())
+        database.add_caption(image_id, caption_text)
+        next_image = get_next_image(database)
+        return flask.redirect(flask.url_for("caption", image_id=next_image.image_id))
 
 
 if __name__ == "__main__":
