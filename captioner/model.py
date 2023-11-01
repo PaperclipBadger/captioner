@@ -3,6 +3,7 @@ import collections
 import dataclasses
 import functools
 import inspect
+import math
 
 import sqlite3
 
@@ -39,7 +40,7 @@ def word_cloud(corpus: List[str]) -> Mapping[str, float]:
     )
     denominator = max(counts.values())
     words = sorted(counts.keys())
-    return {word: counts[word] / denominator for word in words}
+    return {word: math.sqrt(counts[word] / denominator) for word in words}
 
 
 @dataclasses.dataclass
