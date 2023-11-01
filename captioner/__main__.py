@@ -55,6 +55,7 @@ def home():
         image_count=database.count_images(),
         caption_count=database.count_captions(),
         next_image=get_next_image(database),
+        word_cloud=database.word_cloud(),
     )
     
 @app.route("/<int:image_id>")

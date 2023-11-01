@@ -29,5 +29,13 @@
 				<td>{{ caption_count }}</td>
 			</tr>
 		</table>
+
+		{% if word_cloud %}
+		<p>
+		{% for word, weight in word_cloud.items() %}
+		<span style="font-size: {{ '{:.0f}%'.format(weight * 200) }}">{{ word }}</span>
+		{% endfor %}
+		</p>
+		{% endif %}
 	</body>
 </html>

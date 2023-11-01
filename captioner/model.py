@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Mapping
+import collections
 import dataclasses
 import functools
+import inspect
 
 import sqlite3
 
@@ -12,10 +14,40 @@ class Image:
     captions: List[str]
 
 
+def cached(wrapped):
+    sig = inspect.signature(wrapped)
+
+    @functools.wraps(wrapped)
+    def method(self, *args, **kwargs):
+        binding = sig.bind_partial(*args, **kwargs)
+        cache_key = (method.__name__, *binding.arguments.values())
+
+        try:
+            return self.cache[cache_key]
+        except KeyError:
+            self.cache[cache_key] = wrapped(self, *args, **kwargs)
+            return self.cache[cache_key]
+        
+    return method
+
+
+def word_cloud(corpus: List[str]) -> Mapping[str, float]:
+    counts = collections.Counter(
+        word.casefold().strip(",.!?'\"")
+        for sentence in corpus
+        for word in sentence.split()
+    )
+    denominator = max(counts.values())
+    words = sorted(counts.keys())
+    return {word: counts[word] / denominator for word in words}
+
+
 @dataclasses.dataclass
 class Database:
     db: sqlite3.Connection
+    cache: dict = dataclasses.field(default_factory=dict)
 
+    @cached
     def count_images(self) -> int:
         with self.db:
             cursor = self.db.execute(
@@ -24,6 +56,7 @@ class Database:
             row = cursor.fetchone()
         return row[0]
 
+    @cached
     def count_captions(self) -> int:
         with self.db:
             cursor = self.db.execute(
@@ -31,6 +64,15 @@ class Database:
             )
             row = cursor.fetchone()
         return row[0]
+
+    @cached
+    def word_cloud(self) -> Mapping[str, float]:
+        with self.db:
+            cursor = self.db.execute("SELECT * FROM caption")
+            rows = cursor.fetchall()
+        
+        corpus = [row["captiontext"] for row in rows]
+        return word_cloud(corpus) 
 
     def get_image(self, image_id: int) -> Image:
         with self.db:
@@ -46,9 +88,10 @@ class Database:
             return Image(
                 image_id=image_id,
                 name=row["imagename"],
-                captions=self.get_captions(image_id),
+                captions=self.get_captions_for_image(image_id),
             )
         
+    @cached
     def get_least_images(self) -> List[Image]:
         with self.db:
             cursor = self.db.execute(
@@ -67,7 +110,7 @@ class Database:
             Image(
                 image_id=row['imageid'],
                 name=row['imagename'],
-                captions=self.get_captions(row['imageid']),
+                captions=self.get_captions_for_image(row['imageid']),
             )
             for row in rows
         ]
@@ -82,13 +125,12 @@ class Database:
             Image(
                 image_id=row['imageid'],
                 name=row["imagename"],
-                captions=self.get_captions(row['imageid']),
+                captions=self.get_captions_for_image(row['imageid']),
             )
             for row in rows
         ]
 
-    
-    def get_captions(self, image_id: int) -> List[str]:
+    def get_captions_for_image(self, image_id: int) -> List[str]:
         with self.db:
             cursor = self.db.execute(
                 "SELECT * FROM caption WHERE captionimage = ?",
@@ -107,3 +149,6 @@ class Database:
                 "INSERT INTO caption (captionimage, captiontext) VALUES (?,?)",
                 (image_id, caption),
             )
+        
+        # clear the cache on changes
+        self.cache.clear()
