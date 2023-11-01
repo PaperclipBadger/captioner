@@ -31,6 +31,7 @@
 		</table>
 
 		{% if word_cloud %}
+		<h2>Word cloud</h2>
 		<p>
 		{% for word, weight in word_cloud.items() %}
 		<span style="font-size: {{ '{:.0f}%'.format(weight * 200) }}">{{ word }}</span>
