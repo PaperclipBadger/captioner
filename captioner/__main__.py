@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, Mapping
 
+import collections
 import csv
 import io
 import itertools
@@ -36,15 +37,23 @@ def close_db(exception=None):
 
 request_count = iter(itertools.count())
 
-def get_next_image(database) -> Optional[model.Image]:
+def get_next_image(database: model.Database) -> Optional[model.Image]:
     global request_count
 
-    next_images = database.get_least_images()
-    i = next(request_count)
+    next_images = database.get_caption_counts()
+    i = next(request_count) % min(len(next_images), 10)
     return (
-        next_images[i % len(next_images)]
+        next(itertools.islice(next_images, i, i + 1))
         if next_images else None
     )
+
+def progress_bar(database: model.Database) -> Mapping[int, float]:
+    counts = database.get_caption_counts()
+    count_counts = collections.Counter(counts.values())
+    return {
+        i: count_counts[i] / len(counts)
+        for i in range(max(count_counts), -1, -1)
+    }
 
 
 @app.route("/")
@@ -54,6 +63,7 @@ def home():
         "home.html",
         image_count=database.count_images(),
         caption_count=database.count_captions(),
+        progress_bar=progress_bar(database),
         next_image=get_next_image(database),
         word_cloud=database.word_cloud(),
     )
@@ -98,7 +108,7 @@ def api_add_caption():
         database = model.Database(get_db())
         database.add_caption(image_id, caption_text)
         next_image = get_next_image(database)
-        return flask.redirect(flask.url_for("caption", image_id=next_image.image_id))
+        return flask.redirect(flask.url_for("caption", image_id=next_image))
 
 
 if __name__ == "__main__":

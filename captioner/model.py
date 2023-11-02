@@ -38,7 +38,7 @@ def word_cloud(corpus: List[str]) -> Mapping[str, float]:
         for sentence in corpus
         for word in sentence.split()
     )
-    denominator = max(counts.values())
+    denominator = max(counts.values()) if counts else 1
     words = sorted(counts.keys())
     return {word: math.sqrt(counts[word] / denominator) for word in words}
 
@@ -93,28 +93,24 @@ class Database:
             )
         
     @cached
-    def get_least_images(self) -> List[Image]:
+    def get_caption_counts(self) -> Mapping[int, int]:
+        """Returns a sorted mapping from image ids to number of captions."""
         with self.db:
             cursor = self.db.execute(
                 """
-                SELECT image.*
+                SELECT image.imageid, COUNT(caption.captionid) AS caption_count
                 FROM image 
                 LEFT JOIN caption ON image.imageid = caption.captionimage 
                 GROUP BY image.imageid
-                ORDER BY COUNT(caption.captionid) ASC 
-                LIMIT 10
+                ORDER BY caption_count ASC
                 """
             )
             rows = cursor.fetchall()
-
-        return [
-            Image(
-                image_id=row['imageid'],
-                name=row['imagename'],
-                captions=self.get_captions_for_image(row['imageid']),
-            )
+            
+        return {
+            row['imageid']: row['caption_count']
             for row in rows
-        ]
+        }
     
     def get_all_images(self) -> List[Image]:
         # warning! this is the whole database!

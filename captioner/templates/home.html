@@ -3,7 +3,27 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>captioner</title>
-		<style>body { max-width: 40em; margin: auto; font-size: 150% } td { width: 5em }</style>
+		<style>
+		body { max-width: 40em; margin: auto; font-size: 20pt }
+		td { width: 5em }
+		#progress_bar { width: 100%; height: 30px; border: 1px solid black; font-size: 0px; }
+		.progress_bar_item {
+			display: inline-block;
+			vertical-align: top;
+			margin: 0;
+			padding: 0;
+			border: 0;
+			height: 30px;
+			background-color: black;
+			color: white;
+			font-size: 20pt;
+			text-align: right;
+		}
+		#progress_bar :nth-last-child(4) { background-color: grey }
+		#progress_bar :nth-last-child(3) { background-color: darkgrey; color: black }
+		#progress_bar :nth-last-child(2) { background-color: lightgrey; color: black }
+		#progress_bar :nth-last-child(1) { background-color: white; color: black }
+		</style>
 	</head>
 	<body>
 		<!-- maybe if you ask Blaine nicely you can see the source code -->
@@ -13,7 +33,7 @@
 		<p>Send this site to two of your friends! 🔺</p>
 
 		{% if next_image %}
-      	<p><a href="{{ url_for('caption', image_id=next_image.image_id)}}">Start captioning!</a></p>
+      	<p><a href="{{ url_for('caption', image_id=next_image) }}">Start captioning!</a></p>
 		{% endif %}
 
 		<p><a href="{{ url_for('download') }}">Download the captions</a></p>
@@ -29,6 +49,14 @@
 				<td>{{ caption_count }}</td>
 			</tr>
 		</table>
+
+		<p>Progress (number of captions per image):</p>
+		<div id="progress_bar">
+			{% for label, share in progress_bar.items() %}
+			<div class="progress_bar_item" style="width: {{ '{:.0f}%'.format(share * 100) }}">{{ '{:d}: {:.0f}%'.format(label, share * 100) if share > 0.1 else '' }}</div>
+			{% endfor %}
+		</div>
+
 
 		{% if word_cloud %}
 		<h2>Word cloud</h2>
