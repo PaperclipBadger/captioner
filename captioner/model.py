@@ -66,14 +66,31 @@ def word_cloud(corpus: List[str]) -> Mapping[str, float]:
 
     # unify misspellings
     # we'll cache this so it can be expensive
-    while True:
-        for a, b in itertools.combinations(counts, 2):
+    words = list(counts)
+
+    # can't use a for loop because we're editing the list
+    i = 0
+    while i < len(words):
+        a = words[i]
+
+        j = i + 1
+        while j < len(words):
+            b = words[j]
+
             if similarity_score(a, b) > 0.8:
-                c = choose_canonical_spelling(a, b)
-                counts[c] = counts.pop(a) + counts.pop(b)
-                break
-        else:
-            break
+                new_count = counts.pop(a) + counts.pop(b)
+                a = choose_canonical_spelling(a, b)
+                counts[a] = new_count
+                words.pop(j)
+                continue
+
+            j += 1
+        i += 1
+
+    for a, b in itertools.combinations(counts, 2):
+        if similarity_score(a, b) > 0.8:
+            c = choose_canonical_spelling(a, b)
+            counts[c] = counts.pop(a) + counts.pop(b)
 
     denominator = max(counts.values()) if counts else 1
     words = sorted(counts.keys())
