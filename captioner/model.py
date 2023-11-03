@@ -1,10 +1,8 @@
 from typing import List, Mapping
 import collections
 import dataclasses
-import difflib
 import functools
 import inspect
-import itertools
 import math
 
 import sqlite3
@@ -34,47 +32,12 @@ def cached(wrapped):
     return method
 
 
-
-def similarity_score(a: str, b: str) -> float:
-    return difflib.SequenceMatcher(None, a, b).ratio()
-
-
-def choose_canonical_spelling(a: str, b: str) -> str:
-    commonly_misspelt = {
-        "cinderella",
-        "headdress",
-        "octopus",
-        "psychedelic",
-        "x-ray",
-    }
-    if a in commonly_misspelt:
-        return a
-    elif b in commonly_misspelt:
-        return b
-    elif a.endswith('s') and not b.endswith('s'):
-        return b
-    else:
-        return a
-
-
 def word_cloud(corpus: List[str]) -> Mapping[str, float]:
     counts = collections.Counter(
         word.casefold().strip(",.!?'\"")
         for sentence in corpus
         for word in sentence.split()
     )
-
-    # unify misspellings
-    # we'll cache this so it can be expensive
-    while True:
-        for a, b in itertools.combinations(counts, 2):
-            if similarity_score(a, b) > 0.8:
-                c = choose_canonical_spelling(a, b)
-                counts[c] = counts.pop(a) + counts.pop(b)
-                break
-        else:
-            break
-
     denominator = max(counts.values()) if counts else 1
     words = sorted(counts.keys())
     return {word: math.sqrt(counts[word] / denominator) for word in words}
