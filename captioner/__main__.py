@@ -83,17 +83,21 @@ def download():
     database = model.Database(get_db())
     images = database.get_all_images()
 
+    # this is the Huggingface Datasets format
+    # place this file next to the images in dataset/train
+    csv_header = ["file_name", "text"]
     csv_rows = [
-        [image.image_id, image.name, caption]
+        [image.name, caption]
         for image in images
         for caption in image.captions
     ]
 
     file = io.StringIO()
     cw = csv.writer(file)
+    cw.writerow(csv_header)
     cw.writerows(csv_rows)
     output = flask.make_response(file.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=captions.csv"
+    output.headers["Content-Disposition"] = "attachment; filename=metadata.csv"
     output.headers["Content-type"] = "text/csv"
     return output
 
